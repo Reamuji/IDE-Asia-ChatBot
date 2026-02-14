@@ -3,11 +3,6 @@ import time
 import chromadb
 from datetime import datetime
 
-
-        
-
-
-
 docs = [
   "IDE Asia / PT Solusi Inovasi Bangsa is an Indonesian company operating in the information technology and IT services industry.",
   "IDE Asia is commonly known as IDE Asia.",

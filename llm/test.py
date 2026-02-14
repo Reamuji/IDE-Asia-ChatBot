@@ -1,4 +1,4 @@
-from ollama import embed
+from ollama import embednotepad $PROFILE
 
 import time
 
@@ -15,7 +15,7 @@ def time_call(fn, runs=50):
         fn()
         times.append(time.perf_counter() * 1000 - start)
     return {
-        "lad_ms":loadTime,
+        "load_ms":loadTime,
         "avg_ms": sum(times) / runs,
         "min_ms": min(times),
         "max_ms": max(times),
