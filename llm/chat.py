@@ -3,7 +3,7 @@ from ollama import chat
 from chroma import relevantInformationRelatedTo
 
 def generateResponse(messageHistory):
-    lastMessage = messageHistory[-1]['content']
+    lastMessage = messageHistory[-1].content
     additionalInformation = relevantInformationRelatedTo(lastMessage)
     additionalInformation = "\n".join(additionalInformation)
 
