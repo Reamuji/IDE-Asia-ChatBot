@@ -1,36 +1,29 @@
-from ollama import embednotepad $PROFILE
+# # print(pow(1.007,12))
+# # print(1000000*1/0.0052616942768478)
+# # print(2000000*1/0.0052616942768478)
+# # print(3000000*1/0.0052616942768478)
+# # print(4000000*1/0.0052616942768478)
+# print(5000000*1/0.0052616942768478)
 
-import time
+# from ollama import chat
+# from chromaDB import relevantInformationAbout
 
-def time_call(fn, runs=50):
-    loadTime = 0
-    start = time.perf_counter() * 1000
-    fn()
-    loadTime = time.perf_counter() * 1000 - start
+from chat import generateResponse
 
+# print("\n".join(relevantInformationAbout("kontak")))
+
+
+messageHistory = []
+while True:
+    user_input = input('User: ')
+
+    messageHistory += [
+        {'role': 'user', 'content': user_input}
+    ]
     
-    times = []
-    for _ in range(runs):
-        start = time.perf_counter() * 1000
-        fn()
-        times.append(time.perf_counter() * 1000 - start)
-    return {
-        "load_ms":loadTime,
-        "avg_ms": sum(times) / runs,
-        "min_ms": min(times),
-        "max_ms": max(times),
-        "full data": times
-    }
-
-
-# response = embed(model='all-minilm:l6-v2', input='Hello, world!')
-# print(response)
-
-# response = embed(model='llama3.2', input='Hello, world!')
-# print(response['embeddings'])
-
-t1 = time_call(lambda: embed(model='qwen3-embedding:0.6b', input='Hello, world!'))
-t2 = time_call(lambda: embed(model='embeddinggemma:latest', input='Hello, world!'))
-
-print(t1)
-print(t2)
+    botResponse = generateResponse(messageHistory)
+    print('AI: '+ botResponse)
+    
+    messageHistory += [
+        {'role': 'assistant', 'content': botResponse},
+    ]
