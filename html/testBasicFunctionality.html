@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot UI</title>
+    <!-- <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
+          }
+        }
+    </script> -->
+</head>
+<body>
+    <div id="chatHistory">
+    </div>
+    <input type="text" value="test" id="chatbox"><input type="button" id="sendButton" value=">">
+</body>
+<script>
+  let messagesHistory   = [];
+  const sendButton      = document.getElementById("sendButton");
+  const chatHistoryDiv  = document.getElementById("chatHistory");
+
+  function addNewMessage(message){
+    const messageDiv        = document.createElement("div");
+    messageDiv.className    = message.role=="assistant"?"aiMessage message":"userMessage message";
+    messageDiv.textContent  = message.content;
+
+    chatHistoryDiv.appendChild(messageDiv);
+    return messageDiv;
+  }
+
+  sendButton.onclick = () => {
+    // sendButton.classList.add = "disabled";
+    sendButton.disabled = true;
+    const userNewMessageContent = document.getElementById("chatbox").value;
+    const userNewMessage        = {'role': 'user', 'content': userNewMessageContent};
+    document.getElementById("chatbox").value = "";
+
+    addNewMessage(userNewMessage)
+    messagesHistory.push(userNewMessage);
+
+    
+
+    assistantTyping = addNewMessage ({'role': 'assistant', 'content': '...'})
+    fetch(
+      "http://127.0.0.1:8000/getBotResponse",{
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messages: messagesHistory
+      })
+    })
+    .then(
+      response => response.json()
+    ).then(botReply => {
+      // console.log(botReply)
+      sendButton.disabled = false;
+      
+      const botNewMessage = {'role': 'user', 'content': botReply};
+      addNewMessage (botNewMessage)
+      messagesHistory.push(botNewMessage);
+    })
+    .catch(error => {
+      console.error("Error fetching bot response:", error);
+    })
+    .finally(()=>{
+      chatHistory.removeChild(assistantTyping);
+    });
+  }
+</script>
+</html>

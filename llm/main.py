@@ -15,7 +15,9 @@ class ChatRequest(BaseModel):
 
 @app.get("/")
 async def root():
+    # return FileResponse("../html/index.html")
     return FileResponse("../html/index.html")
+
 
 @app.post("/getBotResponse")
 async def chat(data: ChatRequest):

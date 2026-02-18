@@ -12,20 +12,190 @@
           }
         }
     </script> -->
+    <style>
+      *{
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-image: radial-gradient(ellipse at bottom, #192552, #0f0d1d);
+        background-repeat: no-repeat;
+        height: 100vh;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      } 
+
+      
+      /* nanti ini enable lagi, soalnya ngerusak intelsense */
+      @property --angle{
+        syntax: "<angle>";
+        initial-value: 0deg;
+        inherits: false;
+      }
+      @keyframes spin{
+        from{
+          --angle:0deg;
+        }
+        to{
+          --angle:360deg;
+        }
+      }
+      #chatboxContainer{
+        margin: 10px;
+        padding: 0 1em;
+        border-radius: 1.5em;
+        background-color: #0f0d1d;
+        position: absolute;
+      }
+      #chatboxContainer::after,#chatboxContainer::before {
+        --borderThickness:2px;
+        content: '';
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        background-image: conic-gradient(from var(--angle),#192552 110deg,#3d67ff,#a3b7ff,#3d67ff,#192552 );
+        top: 50%;
+        left: 50%;
+        translate: -50% -50%;
+        z-index: -1;
+        padding: var(--borderThickness);
+        border-radius: calc(1.5em + var(--borderThickness));
+        animation: 3s spin linear infinite;
+      }
+      #chatboxContainer::before{
+        filter: blur(0.5em);
+        opacity: 50%;
+      }
+
+      
+      #sendButton{
+        border-radius: 100vh;
+        background-color: #090710;
+        /* background-color: transparent; */
+        padding: 0.5em;
+        transition: background-color 0.3s;
+        width: 1em;
+        height: 1em;
+      }
+      #sendButton:hover{
+        background-color: #09071000;
+      }
+      #sendButtonBorder{
+        height: fit-content;
+        --borderThickness:2px;
+        /* background-image: linear-gradient(var(--angle) , #3d67ff,#a3ddff); */
+        background-image: linear-gradient(335deg , #3d67ff,#a3ddff);
+        border-radius: 100vh;
+        animation: 3s spin linear infinite;
+        padding: 2px;
+      }
+      #sendIcon{
+        width: 1em;
+      }
+
+      #chatInput{
+        padding: 1em 1em 1em 0;
+        color: white;
+        /* background-color: black; */
+        border: none;
+        width: 20em;
+      }
+      #chatInput:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      #chatInputPlaceholderContainer{
+        position: absolute;
+        width: 100%;
+        pointer-events: none;
+        user-select: none; /* optional, just in case */
+      }
+      #chatInputPlaceholder{
+        padding: 1em;
+        color: #ffffff88;
+      }
+
+      
+      .centeredFlex{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* gap: 1em; */
+      }
+      #chatboxContainerMock{
+        height: 3em;
+        width: 1px;
+      }
+
+      #chatHistory{
+        padding-top: 1em;
+      }
+      .message{
+          border: 1px solid #3d67ff;
+          padding: 5px 10px;
+          text-align: left;
+          color: #fff;
+          max-width: 20em;
+          word-wrap: break-word;
+          /* height: auto; */
+      }
+      .userMessage{
+          background-color: #0f0d1d ;
+
+          border-radius: 10px 10px 0 10px; 
+          margin: 5px 0 10px 50px;
+          align-self: flex-end;
+      }
+      .aiMessage{
+          background-image: linear-gradient(155deg , #3d67ff,#192552 );
+
+          border-radius: 10px 10px 10px 0;
+          margin: 0 50px 5px 0 ;
+      }
+
+    </style>
 </head>
 <body>
-    <div id="chatHistory">
+  <!-- <div id="a">a
+    <div id="c">
+      <input type="text" value="test" id="chatbox"><input type="button" id="sendButton" value=">"></div>
+  </div>
+  
+  <div id="b">b</div> -->
+
+    <div id="chatboxContainer">
+      <div id="chatHistory">
+        <!-- <div class="userMessage message">Hello</div>
+        <div class="aiMessage message">Hi</div> -->
+      </div>
+      <div class="centeredFlex">
+        <div id="chatInputPlaceholderContainer"> <div id="chatInputPlaceholder">What would you like to know about IDE Asia ?</div></div>
+        <div id="chatInput" contenteditable="true">
+          </div>
+        <div id="sendButtonBorder"><div id="sendButton">
+          <img src="/html/send-symbol.svg" alt="send" id="sendIcon">
+        </div></div>
+      </div>
     </div>
-    <input type="text" value="test" id="chatbox"><input type="button" id="sendButton" value=">">
+  </div>
 </body>
 <script>
+  const chatInput = document.getElementById("chatInput")
+  const chatInputPlaceholder = document.getElementById("chatInputPlaceholder")
+  chatInput.addEventListener("input", () => {
+    chatInputPlaceholder.hidden = chatInput.textContent != "";
+});
+
   let messagesHistory   = [];
   const sendButton      = document.getElementById("sendButton");
   const chatHistoryDiv  = document.getElementById("chatHistory");
 
   function addNewMessage(message){
     const messageDiv        = document.createElement("div");
-    messageDiv.className    = message.role=="assistant"?"aiMessage":"userMessage" +" message";
+    messageDiv.className    = message.role=="assistant"?"aiMessage message":"userMessage message";
     messageDiv.textContent  = message.content;
 
     chatHistoryDiv.appendChild(messageDiv);
@@ -33,16 +203,16 @@
   }
 
   sendButton.onclick = () => {
+    chatInputPlaceholder.hidden = false
     // sendButton.classList.add = "disabled";
     sendButton.disabled = true;
-    const userNewMessageContent = document.getElementById("chatbox").value;
+    const userNewMessageContent = chatInput.textContent;
     const userNewMessage        = {'role': 'user', 'content': userNewMessageContent};
-    document.getElementById("chatbox").value = "";
+
+    chatInput.textContent = "";
 
     addNewMessage(userNewMessage)
     messagesHistory.push(userNewMessage);
-
-    
 
     assistantTyping = addNewMessage ({'role': 'assistant', 'content': '...'})
     fetch(
@@ -61,7 +231,7 @@
       // console.log(botReply)
       sendButton.disabled = false;
       
-      const botNewMessage = {'role': 'user', 'content': botReply};
+      const botNewMessage = {'role': 'assistant', 'content': botReply};
       addNewMessage (botNewMessage)
       messagesHistory.push(botNewMessage);
     })
