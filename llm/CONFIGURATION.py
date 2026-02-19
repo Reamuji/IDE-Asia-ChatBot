@@ -3,7 +3,7 @@ CHAT_MODEL = 'llama3.2' #best overall
 # CHAT_MODEL = 'ministral-3:3b', #in markdown format | overall good
 # CHAT_MODEL = "gemma3", #Suka reply in english
 
-SYSTEM_PROMPT = "You are representing IDE Asia, you will have a conversation with a customer about IDE asia."
+SYSTEM_PROMPT = "You are representing IDE Asia, you will have a conversation with a customer about the IDE asia company."
 INFORMATION_LIST = [
   "IDE Asia / PT Solusi Inovasi Bangsa is an Indonesian company operating in the information technology and IT services industry.",
   "IDE Asia is commonly known as IDE Asia.",

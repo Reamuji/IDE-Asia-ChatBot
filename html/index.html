@@ -44,7 +44,7 @@
       }
       #chatboxContainer{
         margin: 10px;
-        padding: 0 1em;
+        padding: 1em;
         border-radius: 1.5em;
         background-color: #0f0d1d;
         position: absolute;
@@ -86,7 +86,7 @@
         height: fit-content;
         --borderThickness:2px;
         /* background-image: linear-gradient(var(--angle) , #3d67ff,#a3ddff); */
-        background-image: linear-gradient(335deg , #3d67ff,#a3ddff);
+        background-image: linear-gradient(var(--angle) , #3d67ff,#a3ddff);
         border-radius: 100vh;
         animation: 3s spin linear infinite;
         padding: 2px;
@@ -96,7 +96,7 @@
       }
 
       #chatInput{
-        padding: 1em 1em 1em 0;
+        padding: 0 1em 0 0;
         color: white;
         /* background-color: black; */
         border: none;
@@ -131,29 +131,36 @@
       }
 
       #chatHistory{
-        padding-top: 1em;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        transition: height 0.5s;
+        max-height: 80vh;
+        overflow-y: hidden;
       }
       .message{
           border: 1px solid #3d67ff;
           padding: 5px 10px;
           text-align: left;
           color: #fff;
-          max-width: 20em;
+          max-width: 17em;
           word-wrap: break-word;
           /* height: auto; */
+          white-space: pre-wrap;
       }
       .userMessage{
           background-color: #0f0d1d ;
 
           border-radius: 10px 10px 0 10px; 
-          margin: 5px 0 10px 50px;
+          margin: 0 0 0 auto;
           align-self: flex-end;
       }
       .aiMessage{
           background-image: linear-gradient(155deg , #3d67ff,#192552 );
 
           border-radius: 10px 10px 10px 0;
-          margin: 0 50px 5px 0 ;
+          margin: 0 auto 0 0 ;
       }
 
     </style>
@@ -173,10 +180,9 @@
       </div>
       <div class="centeredFlex">
         <div id="chatInputPlaceholderContainer"> <div id="chatInputPlaceholder">What would you like to know about IDE Asia ?</div></div>
-        <div id="chatInput" contenteditable="true">
-          </div>
+        <div id="chatInput" contenteditable="true"></div>
         <div id="sendButtonBorder"><div id="sendButton">
-          <img src="/html/send-symbol.svg" alt="send" id="sendIcon">
+          <img src="send-symbol.svg" alt="send" id="sendIcon">
         </div></div>
       </div>
     </div>
@@ -187,6 +193,15 @@
   const chatInputPlaceholder = document.getElementById("chatInputPlaceholder")
   chatInput.addEventListener("input", () => {
     chatInputPlaceholder.hidden = chatInput.textContent != "";
+  });
+  chatInput.addEventListener("keydown", (pressed) => {
+  if (pressed.key === "Enter") {
+    // Allow Shift+Enter to create a new line
+    if (pressed.shiftKey) return;
+
+    pressed.preventDefault(); // stop line break
+    sendButton.onclick()
+  }
 });
 
   let messagesHistory   = [];
@@ -194,29 +209,49 @@
   const chatHistoryDiv  = document.getElementById("chatHistory");
 
   function addNewMessage(message){
+    
     const messageDiv        = document.createElement("div");
     messageDiv.className    = message.role=="assistant"?"aiMessage message":"userMessage message";
     messageDiv.textContent  = message.content;
+    
+    console.log("messageDiv.textContent = "+messageDiv.textContent)
+    
+    const prevChatHistoryDivHeight = getComputedStyle(chatHistoryDiv).height;
+    chatHistoryDiv.style.height="auto";
 
     chatHistoryDiv.appendChild(messageDiv);
+
+    const nextChatHistoryDivHeight = getComputedStyle(chatHistoryDiv).height;
+    chatHistoryDiv.style.height=prevChatHistoryDivHeight;
+    setTimeout(() => {
+      chatHistoryDiv.style.height=nextChatHistoryDivHeight;
+    }, 100);
+    
+    setTimeout(() => {
+      /* scrollToEnd */
+      chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+    }, 500);
     return messageDiv;
   }
 
   sendButton.onclick = () => {
+    chatHistoryDiv.style.paddingBottom = "10px"
     chatInputPlaceholder.hidden = false
     // sendButton.classList.add = "disabled";
     sendButton.disabled = true;
     const userNewMessageContent = chatInput.textContent;
+    console.log("userNewMessageContent = "+userNewMessageContent)
     const userNewMessage        = {'role': 'user', 'content': userNewMessageContent};
 
     chatInput.textContent = "";
 
     addNewMessage(userNewMessage)
     messagesHistory.push(userNewMessage);
+    chatInputPlaceholder.textContent = "Please Wait...";
 
-    assistantTyping = addNewMessage ({'role': 'assistant', 'content': '...'})
+    // assistantTyping = addNewMessage ({'role': 'assistant', 'content': '...'})
     fetch(
-      "http://127.0.0.1:8000/getBotResponse",{
+      "/getBotResponse",{
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -232,14 +267,18 @@
       sendButton.disabled = false;
       
       const botNewMessage = {'role': 'assistant', 'content': botReply};
+      
+      // chatHistory.removeChild(assistantTyping);
       addNewMessage (botNewMessage)
       messagesHistory.push(botNewMessage);
     })
     .catch(error => {
+      // chatHistory.removeChild(assistantTyping);
+      addNewMessage ({'role': 'assistant', 'content': "Im so sorry, My system is currently down. Please try again later"})
       console.error("Error fetching bot response:", error);
     })
     .finally(()=>{
-      chatHistory.removeChild(assistantTyping);
+      chatInputPlaceholder.textContent = "What would you like to know about IDE Asia ?";
     });
   }
 </script>

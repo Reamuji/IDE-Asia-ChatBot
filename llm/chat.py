@@ -14,7 +14,7 @@ def generateResponse(messageHistory):
             {
                 'role': 'system',
                 'content': 
-                    f"{CONFIGURATION.SYSTEM_PROMPT} only answer according to the following Information : {additionalInformation}. Say you dont know if no relevant information is provided"
+                    f"{CONFIGURATION.SYSTEM_PROMPT} only answer according to the following Information : {additionalInformation}. Say you dont know if no relevant information is provided. You only capabilities is to answer question. Answer as brief as possible."
             },
             *messageHistory
         ],
